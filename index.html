@@ -1,0 +1,146 @@
+<?php
+require_once 'config/database.php';
+require_once 'includes/functions.php';
+
+// Récupérer les catégories
+$categories = $pdo->query("SELECT * FROM categories WHERE is_active = 1 ORDER BY name")->fetchAll();
+
+// Récupérer les produits en vedette
+$featured_products = $pdo->query("SELECT * FROM products WHERE is_featured = 1 AND is_active = 1 ORDER BY created_at DESC LIMIT 8")->fetchAll();
+
+// Récupérer les dernières nouveautés
+$new_products = $pdo->query("SELECT * FROM products WHERE is_active = 1 ORDER BY created_at DESC LIMIT 8")->fetchAll();
+
+include 'includes/header.php';
+?>
+
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-content">
+        <h1>Votre Santé, Notre Priorité</h1>
+        <p>Découvrez notre gamme complète de médicaments et produits de parapharmacie en ligne</p>
+        <div class="hero-buttons">
+            <a href="products.php" class="btn btn-primary btn-lg">
+                <i class="fas fa-shopping-bag"></i> Commander maintenant
+            </a>
+            <a href="#categories" class="btn btn-outline-light btn-lg">
+                <i class="fas fa-search"></i> Explorer
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Statistiques -->
+<section class="stats">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <i class="fas fa-medal"></i>
+                <h3>10+</h3>
+                <p>Années d'expérience</p>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-boxes"></i>
+                <h3>1000+</h3>
+                <p>Produits disponibles</p>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-users"></i>
+                <h3>5000+</h3>
+                <p>Clients satisfaits</p>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-truck"></i>
+                <h3>24h</h3>
+                <p>Livraison rapide</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Catégories -->
+<section id="categories" class="categories-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Nos Catégories</h2>
+            <p>Découvrez tous nos produits par catégorie</p>
+        </div>
+        <div class="categories-grid">
+            <?php foreach($categories as $category): ?>
+            <a href="products.php?category=<?= $category['id'] ?>" class="category-card">
+                <div class="category-icon">
+                    <i class="fas <?= $category['icon'] ?>"></i>
+                </div>
+                <h3><?= htmlspecialchars($category['name']) ?></h3>
+                <p><?= htmlspecialchars(substr($category['description'], 0, 60)) ?>...</p>
+            </a>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+
+<!-- Produits en vedette -->
+<section class="products-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Produits en Vedette</h2>
+            <p>Les produits les plus populaires de notre pharmacie</p>
+        </div>
+        <div class="products-grid">
+            <?php foreach($featured_products as $product): ?>
+            <div class="product-card">
+                <div class="product-badge">En vedette</div>
+                <img src="uploads/products/<?= $product['image_url'] ?: 'placeholder.jpg' ?>" 
+                     alt="<?= htmlspecialchars($product['name']) ?>" 
+                     class="product-image">
+                <div class="product-info">
+                    <h3><?= htmlspecialchars($product['name']) ?></h3>
+                    <p class="product-desc"><?= htmlspecialchars(substr($product['short_description'] ?? $product['description'], 0, 60)) ?>...</p>
+                    <div class="product-price">
+                        <?= formatPrice($product['price']) ?>
+                        <?php if($product['compare_price']): ?>
+                        <span class="old-price"><?= formatPrice($product['compare_price']) ?></span>
+                        <?php endif; ?>
+                    </div>
+                    <div class="product-actions">
+                        <a href="product_detail.php?id=<?= $product['id'] ?>" class="btn btn-primary btn-sm">Voir</a>
+                        <button onclick="addToCart(<?= $product['id'] ?>)" class="btn btn-success btn-sm">
+                            <i class="fas fa-cart-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+
+<!-- Features -->
+<section class="features">
+    <div class="container">
+        <div class="features-grid">
+            <div class="feature-card">
+                <i class="fas fa-shield-alt"></i>
+                <h3>Produits Certifiés</h3>
+                <p>Tous nos produits sont certifiés et traçables</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-truck-fast"></i>
+                <h3>Livraison Rapide</h3>
+                <p>Livraison sous 24 à 48h dans toute la ville</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-phone-alt"></i>
+                <h3>Support 7/7</h3>
+                <p>Une équipe à votre écoute pour vous conseiller</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-lock"></i>
+                <h3>Paiement Sécurisé</h3>
+                <p>Transactions 100% sécurisées</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<?php include 'includes/footer.php'; ?>
